@@ -15,7 +15,8 @@ const $userform = $("#user-form");
 
 $userform.submit(function (event) {
     event.preventDefault();
-    const searchTerm = encodeURIComponent("https://github.com/");
+    const userInput = $input.val();
+    const searchTerm = encodeURIComponent(`${userInput}`);
     $.get(`/query/${searchTerm}`, (data) => {
         const result = JSON.stringify(data);
         let $results = $("#results").empty();

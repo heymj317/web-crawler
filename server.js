@@ -58,16 +58,16 @@ app.listen(PORT, () => {
 async function scrapeWebsite(queryURL) {
     const webSite = queryURL;
 
-    const urlInfo = urlParser(targetSite);
+    const urlInfo = urlParser(queryURL);
     const seenLinks = {};
     const sites = [];
-    const queryCompleted = false;
+    let queryCompleted = false;
 
-    console.log(`Scraping ${targetSite}`);
-    const result = await fetch(targetSite)
+    console.log(`Scraping ${queryURL}`);
+    const result = await fetch(queryURL)
         .then(res => {
             //console.log(res.headers.raw()); 
-            //targetSite = res.headers.get('server');
+            //queryURL = res.headers.get('server');
             return (res.text());
         })
         .then(body => {
@@ -78,10 +78,10 @@ async function scrapeWebsite(queryURL) {
             const parser = new htmlparser2.Parser({
                 onattribute(name, value) {
                     if (name === "href") {
-                        link = normalizeLink(value);
+                        link = normalizeLink(queryURL, value);
                         if (!seenLinks[link]) {
                             seenLinks[link] = link;
-                            sites.push({ url: link, referred_by: targetSite, collected: date.toString() });
+                            sites.push({ url: link, referred_by: queryURL, collected: date.toString() });
                         }
 
                     }
@@ -103,7 +103,7 @@ async function scrapeWebsite(queryURL) {
 }
 
 
-function normalizeLink(url) {
+function normalizeLink(domain, url) {
     ++count;
     if (url.startsWith('http')) {
         return url;
@@ -113,10 +113,10 @@ function normalizeLink(url) {
         //return url.slice(2);
         return "https:" + url;
     } else if (url.startsWith('/')) {
-        return targetSite + url;
+        return domain + url;
     } else {
-        // console.log(count + "-->" + targetSite + url);
-        return targetSite + url;
+        // console.log(count + "-->" + queryURL + url);
+        return domain + url;
     }
     //console.log(count, "-->", url);
 
@@ -135,14 +135,14 @@ function normalizeLink(url) {
 /// - - - DATABASE SEARCH
 function dbSearch() {
     const userInput = "tesla";
-    const url = urlParser(targetSite);
+    const url = urlParser(queryURL);
     let seenLinks = {};
 
     //HTTP GET REQUEST
-    fetch(targetSite)
+    fetch(queryURL)
         .then(res => {
             //console.log(res.headers.raw());
-            //targetSite = res.headers.get('server');
+            //queryURL = res.headers.get('server');
             return (res.text());
         })
         .then(body => {
