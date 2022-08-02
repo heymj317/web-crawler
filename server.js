@@ -6,7 +6,10 @@ const htmlparser2 = require("htmlparser2");
 const fetch = require("node-fetch");
 const urlParser = require('urlParser');
 const { query } = require("express");
+const { data } = require("jquery");
+const { readFile, writeFile } = require("fs/promises");
 
+//DEV VARs for now:
 let count = 0;
 let targetSite = `https://github.com/`;
 
@@ -14,38 +17,89 @@ let targetSite = `https://github.com/`;
 dotenv.config();
 const { DATABASE_URL, PORT, NODE_ENV } = process.env;
 
-
+//SPIN UP EXPRESS
 const app = express();
 
 //PSQL CONNECTION SETTINGS
 const pool = new pg.Pool({
     connectionString: DATABASE_URL,
-    ssl: NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+    ssl: NODE_ENV === "production" ? { rejectUnauthorized: false } : false, //Heroku-specific setting
 });
 
 //MIDDLEWARE
-app.use(express.static('static'));
-app.use(express.json());
+app.use(express.static('static')); //static routes
+app.use(express.json()); //json parser
 
 
-//---CHECK DATABASE----
-app.get("/query/:qStriing", (req, res, next) => {
+//---GET Website DATA----
+app.get("/query/:qString", (req, res, next) => {
+    const queryString = req.params.qString;
+    const parsedUrl = urlParser(queryString);
+    const host = parsedUrl[3];
 
-    /*
-        pool
-            .query(`SELECT * FROM links WHERE url = ${req.params.qString}`)
-            .then(data => {
+    // pool.query(`SELECT is_Scraped FROM links WHERE url = '${queryString}'`)
+    //     .then(data => {
+    //         console.log("Was this already collected? ", data);
+    //     })
+    pool
+        .query(`SELECT * FROM links WHERE host = '${host}'`)
+        .then(data => {
+
+            if (data.rows.length > 0) {
                 res.send(data.rows);
-            })
-            .catch(e => console.error(e.stack))
-            */
-    async function siteScraper(qStringURL) {
-        result = await scrapeWebsite(qStringURL);
-        return result;
-    }
-    siteScraper(req.params.qStriing).then((data) => {
-        res.send(data);
-    });
+                return;
+            } else if (data.rows.length === 0) {
+                console.log("No Results in SERVER...")
+                async function siteScraper(queryString) {
+                    result = await scrapeWebsite(queryString);
+                    return result;
+                }
+                siteScraper(queryString).then((data) => {
+                    let count = 0;
+                    const links = [];
+                    let linkTableInput = "";
+                    let l2TableInput = "";
+                    for (var i = 0; i < data.length; ++i) {
+                        const { url, host, lastSeen } = data[i];
+                        linkTableInput = linkTableInput + `INSERT INTO links (url, host, lastSeen) VALUES (
+                                '${url}',
+                                '${host}',
+                                '${lastSeen}')
+                                ON CONFLICT (url)
+                                DO UPDATE SET lastSeen = EXCLUDED.lastSeen;\n`;
+
+                        l2TableInput = l2TableInput + `INSERT INTO link_to_link (url, host, lastSeen) VALUES (
+                            '${url}',
+                            '${host}',
+                            '${lastSeen}');\n`;
+
+                    };
+
+                    for (var i = 0; i < data.length; ++i) {
+                        const { url, host, lastSeen } = data[i];
+
+
+                    };
+
+                    //INSERT TO links table
+                    pool
+                        .query(linkTableInput).then(data => {
+
+                        }).catch(err => {
+                            console.error(err);
+                        });
+                    //INSERT TO link-to-link table
+                    pool.query()
+                    res.send(data);
+
+                });
+            }
+
+        })
+        .catch(e => console.error(e))
+
+
+
 
 });
 
@@ -63,7 +117,7 @@ async function scrapeWebsite(queryURL) {
     const sites = [];
     let queryCompleted = false;
 
-    console.log(`Scraping ${queryURL}`);
+    console.log(`Scraping ${queryURL} `);
     const result = await fetch(queryURL)
         .then(res => {
             //console.log(res.headers.raw()); 
@@ -79,9 +133,10 @@ async function scrapeWebsite(queryURL) {
                 onattribute(name, value) {
                     if (name === "href") {
                         link = normalizeLink(queryURL, value);
+                        const host = urlParser(link);
                         if (!seenLinks[link]) {
                             seenLinks[link] = link;
-                            sites.push({ url: link, referred_by: queryURL, collected: date.toString() });
+                            sites.push({ url: link, host: host[3], referred_by: queryURL, lastSeen: date.toUTCString() });
                         }
 
                     }
