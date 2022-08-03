@@ -42,13 +42,12 @@ app.get("/query/:qString", (req, res, next) => {
     //         console.log("Was this already collected? ", data);
     //     })
     pool
-        .query(`SELECT * FROM links WHERE host = '${host}'`)
+        .query(`SELECT * FROM links WHERE url LIKE '${host}%'`)
         .then(data => {
-
-            if (data.rows.length > 0) {
+            if (data.rowCount > 0) {
                 res.send(data.rows);
                 return;
-            } else if (data.rows.length === 0) {
+            } else if (data.rowCount === 0) {
                 console.log("No Results in SERVER...")
                 async function siteScraper(queryString) {
                     result = await scrapeWebsite(queryString);
@@ -61,19 +60,20 @@ app.get("/query/:qString", (req, res, next) => {
                     let l2TableInput = "";
                     for (var i = 0; i < data.length; ++i) {
                         const { url, host, lastSeen } = data[i];
-                        linkTableInput = linkTableInput + `INSERT INTO links (url, host, lastSeen) VALUES (
-                                '${url}',
-                                '${host}',
-                                '${lastSeen}')
-                                ON CONFLICT (url)
-                                DO UPDATE SET lastSeen = EXCLUDED.lastSeen;\n`;
+                        linkTableInput = linkTableInput + `INSERT INTO links (url, host, lastSeen) VALUES ('${url}',
+                        '${host}',
+                        '${lastSeen}')
+                        ON CONFLICT (url)
+                        DO UPDATE SET lastSeen = '${lastSeen}';\n`;
 
-                        l2TableInput = l2TableInput + `INSERT INTO link_to_link (url, host, lastSeen) VALUES (
-                            '${url}',
-                            '${host}',
-                            '${lastSeen}');\n`;
+                        l2TableInput = l2TableInput +
+                            `INSERT INTO link_to_link (link_id, referred_by, time_collected)
+                        SELECT (SELECT id FROM links WHERE url = '${url}'), 
+                            (SELECT id FROM links WHERE url = '${queryString}'),
+                            (SELECT lastSeen FROM links WHERE url = '${url}');\n`;
 
                     };
+
 
                     for (var i = 0; i < data.length; ++i) {
                         const { url, host, lastSeen } = data[i];
@@ -84,12 +84,12 @@ app.get("/query/:qString", (req, res, next) => {
                     //INSERT TO links table
                     pool
                         .query(linkTableInput).then(data => {
+                            pool.query(l2TableInput);
 
                         }).catch(err => {
                             console.error(err);
                         });
                     //INSERT TO link-to-link table
-                    pool.query()
                     res.send(data);
 
                 });
