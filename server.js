@@ -153,8 +153,6 @@ async function scrapeWebsite(queryURL) {
 
 
 function normalizeLink(domain, url) {
-    ++count;
-
     if (url.startsWith('http')) {
         return url;
     } else if (url.startsWith('https')) {
