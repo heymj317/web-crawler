@@ -10,8 +10,6 @@ const { readFile, writeFile } = require("fs/promises");
 //GET ENVIRONMENT VARIABLES
 dotenv.config();
 const { DATABASE_URL, PORT, NODE_ENV } = process.env;
-console.log(DATABASE_URL);
-console.log(process.env);
 
 //SPIN UP EXPRESS
 const app = express();
