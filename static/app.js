@@ -20,24 +20,24 @@ $(function () {
     $.jstree.defaults.core.check_callback = true;
 
 
-    $('#jstree_results').jstree({
-        'core': {
-            'data': [
-                'Simple root node',
-                {
-                    'text': 'Root node 2',
-                    'state': {
-                        'opened': true,
-                        'selected': true
-                    },
-                    'children': [
-                        { 'text': 'Child 1' },
-                        'Child 2'
-                    ]
-                }
-            ]
-        }
-    });
+    // $('#jstree_results').jstree({
+    //     'core': {
+    //         'data': [
+    //             'Simple root node',
+    //             {
+    //                 'text': 'Root node 2',
+    //                 'state': {
+    //                     'opened': true,
+    //                     'selected': true
+    //                 },
+    //                 'children': [
+    //                     { 'text': 'Child 1' },
+    //                     'Child 2'
+    //                 ]
+    //             }
+    //         ]
+    //     }
+    // });
 
 
     console.log("jstree is RUNNING");
@@ -48,73 +48,19 @@ $(function () {
     });
 
     $('form').on('submit', function (event) {
-        $('#jstree_demo_div').jstree({
-            'core': {
-                'data': function () {
-                    let nodes = [];
-                    event.preventDefault();
-                    const userInput = $input.val();
-                    const searchTerm = encodeURIComponent(`${userInput}`);
-
-                    if (isValidUrl(userInput)) {
-                        $.get(`/query/${searchTerm}`, (data) => {
-                            const result = JSON.stringify(data);
-                            let $results = $("#jstree_results").empty();
-
-                            let $row = $(`<div class="row"></div>`);
-                            $row.html(`<div class="row">${result}</div>`);
-                            $row.appendTo($results);
-
-                            return data;
-
-
-                        }).then(data => {
-                            let paths = data;
-                            let result = [];
-                            let level = { result };
-
-                            for (var i = 0; i < data.length; i++) {
-                                const url = data[i]['url'];
-                                url.split('/').reduce((r, name, i, a) => {
-                                    if (!r[name]) {
-                                        r[name] = { result: [] };
-                                        r.result.push({ text: name, children: r[name].result })
-                                    }
-
-                                    return r[name];
-                                }, level)
-                            }
-
-                            console.log(result)
-                            nodes = result;
-                            return data;
-
-                        });
-                    };
-                    console.log(nodes);
-                    return nodes;
-                }
-            }
-        });
-    });
-
-    $('#jstree_results').on("changed.jstree", function (e, data) {
-        console.log(data.node);
-    });
-
-    $userform.submit(function (event) {
         event.preventDefault();
+        let nodes = [];
         const userInput = $input.val();
         const searchTerm = encodeURIComponent(`${userInput}`);
 
         if (isValidUrl(userInput)) {
             $.get(`/query/${searchTerm}`, (data) => {
-                const result = JSON.stringify(data);
-                let $results = $("#jstree_results").empty();
+                // const result = JSON.stringify(data);
+                // let $results = $("#jstree_results").empty();
 
-                let $row = $(`<div class="row"></div>`);
-                $row.html(`<div class="row">${result}</div>`);
-                $row.appendTo($results);
+                // let $row = $(`<div class="row"></div>`);
+                // $row.html(`<div class="row">${result}</div>`);
+                // $row.appendTo($results);
 
                 return data;
 
@@ -135,40 +81,103 @@ $(function () {
                         return r[name];
                     }, level)
                 }
-                paths.forEach(path => {
-
-                })
 
                 console.log(result)
+                nodes = result;
 
+                let $container = $('#results_container').empty();
 
-                $('div:jstree_results').jstree(true).destroy();
-                $('#jstree_results').jstree(true).destroy();
-                $('#jstree_demo_div').jstree();
+                let $jstree_demo_div = $(`<div id="jstree_demo_div"></div>`);
+                $jstree_demo_div.html(`<div id="jstree_demo_div"><ul></ul></div>`);
+                $jstree_demo_div.appendTo($container);
+
                 $('#jstree_demo_div').jstree({
                     'core': {
-                        'data': result
+                        'data': nodes
                     }
                 });
 
-                const tree = JASON.stringify(result);
-                $('#jstree_demo_div').jstree({
-                    'core': {
-                        'data': `${tree}`
-                    }
-                });
                 return data;
-
-                //const tree = JSON.stringify(data);
-                let $tree = $("#jstree_results").empty();
-
-
 
             });
         };
+        console.log(nodes);
+
 
 
     });
+
+    // $('#jstree_results').on("changed.jstree", function (e, data) {
+    //     console.log(data.node);
+    // });
+
+    // $userform.submit(function (event) {
+    //     event.preventDefault();
+    //     const userInput = $input.val();
+    //     const searchTerm = encodeURIComponent(`${userInput}`);
+
+    //     if (isValidUrl(userInput)) {
+    //         $.get(`/query/${searchTerm}`, (data) => {
+    //             // const result = JSON.stringify(data);
+    //             // let $results = $("#jstree_results").empty();
+
+    //             // let $row = $(`<div class="row"></div>`);
+    //             // $row.html(`<div class="row">${result}</div>`);
+    //             // $row.appendTo($results);
+
+    //             return data;
+
+
+    //         }).then(data => {
+    //             let paths = data;
+    //             let result = [];
+    //             let level = { result };
+
+    //             for (var i = 0; i < data.length; i++) {
+    //                 const url = data[i]['url'];
+    //                 url.split('/').reduce((r, name, i, a) => {
+    //                     if (!r[name]) {
+    //                         r[name] = { result: [] };
+    //                         r.result.push({ text: name, children: r[name].result })
+    //                     }
+
+    //                     return r[name];
+    //                 }, level)
+    //             }
+    //             paths.forEach(path => {
+
+    //             })
+
+    //             console.log(result)
+
+
+    //             // $('div:jstree_results').jstree(true).destroy();
+    //             // $('#jstree_results').jstree(true).destroy();
+    //             $('#jstree_demo_div').jstree();
+    //             $('#jstree_demo_div').jstree({
+    //                 'core': {
+    //                     'data': result
+    //                 }
+    //             });
+
+    //             const tree = JASON.stringify(result);
+    //             $('#jstree_demo_div').jstree({
+    //                 'core': {
+    //                     'data': `${tree}`
+    //                 }
+    //             });
+    //             return data;
+
+    //             //const tree = JSON.stringify(data);
+    //             let $tree = $("#jstree_results").empty();
+
+
+
+    //         });
+    //     };
+
+
+    // });
 
 });
 

@@ -160,9 +160,12 @@ async function scrapeWebsite(queryURL) {
 
 function normalizeLink(domain, url) {
     ++count;
+
     if (url.startsWith('http')) {
         return url;
-    } else if (url.includes('://')) {
+    } else if (url.startsWith('https')) {
+        return url;
+    } else if (url.startsWith('www')) {
         return url;
     } else if (url.startsWith('//')) {
         //return url.slice(2);
@@ -171,8 +174,10 @@ function normalizeLink(domain, url) {
         return domain + url;
     } else {
         // console.log(count + "-->" + queryURL + url);
-        return domain + url;
+        return domain;
     }
+
+
     //console.log(count, "-->", url);
 
     // seenLinks[url] = true;
