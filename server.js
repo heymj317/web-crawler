@@ -1,12 +1,10 @@
 const pg = require("pg");
 const express = require("express");
-//const { response } = require("express");
 const dotenv = require("dotenv"); //Probramatically get env variables from .env file
 const htmlparser2 = require("htmlparser2");
 const fetch = require("node-fetch");
 const urlParser = require('urlParser');
 const { query } = require("express");
-const { data } = require("jquery");
 const { readFile, writeFile } = require("fs/promises");
 
 //DEV VARs for now:
