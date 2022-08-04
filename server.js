@@ -4,8 +4,7 @@ const dotenv = require("dotenv"); //Probramatically get env variables from .env 
 const htmlparser2 = require("htmlparser2");
 const fetch = require("node-fetch");
 const urlParser = require('urlParser');
-const { query } = require("express");
-const { readFile, writeFile } = require("fs/promises");
+
 
 //GET ENVIRONMENT VARIABLES
 dotenv.config();
@@ -25,41 +24,39 @@ app.use(express.static('static')); //static routes
 app.use(express.json()); //json parser
 
 
-//---GET Website DATA----
+//---GET REQUEST----
 app.get("/query/:qString", (req, res, next) => {
     const queryString = req.params.qString;
     const parsedUrl = urlParser(queryString);
     const host = parsedUrl[3];
 
-    // pool.query(`SELECT is_Scraped FROM links WHERE url = '${queryString}'`)
-    //     .then(data => {
-    //         console.log("Was this already collected? ", data);
-    //     })
     pool
         .query(`SELECT * FROM links WHERE url LIKE '${host}%'`)
         .then(data => {
+            //CONFIRM TARGET IS IN DB AND RETURN
             if (data.rowCount > 0) {
                 res.send(data.rows);
                 return;
             } else if (data.rowCount === 0) {
                 console.log("No Results in SERVER...")
-                async function siteScraper(queryString) {
-                    result = await scrapeWebsite(queryString);
-                    return result;
-                }
+
                 siteScraper(queryString).then((data) => {
+                    //COLLECT LINKS, THEN ADD TO DB
                     let count = 0;
                     const links = [];
                     let linkTableInput = "";
                     let l2TableInput = "";
                     for (var i = 0; i < data.length; ++i) {
                         const { url, host, lastSeen } = data[i];
+
+                        //DB TABLE
                         linkTableInput = linkTableInput + `INSERT INTO links (url, host, lastSeen) VALUES ('${url}',
                         '${host}',
                         '${lastSeen}')
                         ON CONFLICT (url)
                         DO UPDATE SET lastSeen = '${lastSeen}';\n`;
 
+                        //DB TABLE
                         l2TableInput = l2TableInput +
                             `INSERT INTO link_to_link (link_id, referred_by, time_collected)
                         SELECT (SELECT id FROM links WHERE url = '${url}'), 
@@ -102,7 +99,10 @@ app.listen(PORT, () => {
 })
 
 
-
+async function siteScraper(queryString) {
+    result = await scrapeWebsite(queryString);
+    return result;
+};
 async function scrapeWebsite(queryURL) {
     const webSite = queryURL;
 
