@@ -7,6 +7,6 @@ html {
   }
 
   #footer {
-    position: fixed;
+    position: relative;
     background-color: darkslategrey;
   }

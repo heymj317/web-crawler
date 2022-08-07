@@ -50,16 +50,17 @@ app.get("/query/:qString", (req, res, next) => {
                         const { url, host, lastSeen } = data[i];
 
                         //DB TABLE
-                        linkTableInput = linkTableInput + `INSERT INTO links (url, host, lastSeen) VALUES ('${url}',
-                        '${host}',
-                        '${lastSeen}')
-                        ON CONFLICT (url)
-                        DO UPDATE SET lastSeen = '${lastSeen}';\n`;
+                        linkTableInput = linkTableInput +
+                            `INSERT INTO links (url, host, lastSeen) VALUES ('${url}',
+                            '${host}',
+                            '${lastSeen}')
+                            ON CONFLICT (url)
+                            DO UPDATE SET lastSeen = '${lastSeen}';\n`;
 
                         //DB TABLE
                         l2TableInput = l2TableInput +
                             `INSERT INTO link_to_link (link_id, referred_by, time_collected)
-                        SELECT (SELECT id FROM links WHERE url = '${url}'), 
+                            SELECT (SELECT id FROM links WHERE url = '${url}'), 
                             (SELECT id FROM links WHERE url = '${queryString}'),
                             (SELECT lastSeen FROM links WHERE url = '${url}');\n`;
 

@@ -34,8 +34,11 @@
 
   <body class="position-relative">
     <div class="bg obj-fit-cover" style="background-image: url('./images/mainBackground.jpg'); height: 100vh;">
-    <!-- Fixed navbar -->
-    <nav class="navbar navbar-expand-lg bg-light fixed-top">
+   
+   
+   
+<!-- Fixed navbar -->
+    <nav class="navbar-collapse-xlg navbar-nav navbar navbar-toggler bg-light fixed-top">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">MJ's Link-Grabber</a>
   
@@ -70,20 +73,21 @@
           </div>
           </p>
         </div>
-        <!--/.nav-collapse -->
       </div>
     </nav>
+<!--/.nav-collapse -->
   <main>
-    <div class="container">
-      <!-- Main component for a primary marketing message or call to action -->
+
+    <div class="container pt-5">
+        <section class="bg-info pt-2 text-center"> hello! :)</section>
       <div class="w-responsive text-center mx-auto p-3 mt-5">
         <div class="jumbotron">
-          <h1 class="display-4">Link-Grabber</h1>
-          <h4>Scrape public webpages for hyperlinks</h4>
-          <p class="lead">
+          <h1 class="display-6">Link-Grabber</h1>
+          <h5>Scrape public webpages for hyperlinks</h5>
+          <p class="fw-light fs-6">
             Enter the URL and click <i>Search</i> to get started.
           </p>
-          <div class="container">
+          <div class="container pb-1">
   
               <form class="row clearfix g-0" id="user-form">
                 <div class="col-lg-2"></div>
@@ -102,19 +106,19 @@
           </div>
           
           <div class="jumbotron">
-            <div class="container-lg text-center">
-                <div id="row justify-content-sm-center" class="d-flex align-content center">
-                    <div id="results">
-                        <div id="container" class="col col-lg-5">
+            <div class="container-lg">
+                <div id="row justify-content-start" class="d-flex text-left">
+                  <div id="results" class="col-3"></div>
+
+                        <div id="container" class="col-3">
                             <div id="results_container" class="col-lg-6 text-left bg-white">
-                                <div id="jstree_demo_div" class="col-sm">
-                                  <ul><i>Results Will Load Here</i>
+                                <div id="jstree_demo_div" class="col-sm py-3">
+                                  <ul><small class="text-nowrap" ><i>Results Will Load Here</i></small>
                                   </ul>
                                 </div>
                               </div>
                         </div>
     
-                        </div> 
                     </div>
             </div>
 
@@ -122,9 +126,9 @@
         </div>
       </div>
     </div>
-    </div>
-  </div>
-</main>
+
+
+  </main>
     <!-- /container -->
   <footer class="bg-light mt-4 fixed-bottom navbar navbar-nav navbar-toggler navbar-collapse-lg">
 
