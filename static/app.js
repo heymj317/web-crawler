@@ -3,6 +3,19 @@
 const $input = $("input[name='Search']");
 const $userform = $("#user-form");
 
+const noticePlaceholder = document.getElementById('liveNoticePlaceholder')
+
+const notice = (message, type) => {
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('')
+
+    noticePlaceholder.append(wrapper)
+}
 
 
 $(function () {
@@ -23,6 +36,7 @@ $(function () {
         const searchTerm = encodeURIComponent(`${userInput}`);
 
         if (isValidUrl(userInput)) { //USER INPUT VALIDATION
+            notice("Searching!", "success");
             $.get(`/query/${searchTerm}`, (data) => { //RESTAPI QUERY (SEARCH DB FIRST, SCRAPE IF NEEDED)
                 return data;
             }).then(data => { //
@@ -62,7 +76,8 @@ $(function () {
 
             });
         } else {
-            alert('Please enter a valid url e.g. https://cnn.com');
+            notice('Please enter a valid url e.g. https://cnn.com', 'danger')
+            //alert('Please enter a valid url e.g. https://cnn.com');
         };
         console.log(nodes);
 
